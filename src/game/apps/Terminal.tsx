@@ -1,0 +1,123 @@
+import { useEffect, useRef, useState } from 'react'
+import { RESTORE_KEY } from '../story'
+import { useGame } from '../store'
+import { sfx } from '../audio'
+
+type Line = { k: 'in' | 'out' | 'err' | 'ok'; t: string }
+
+const FILES: Record<string, string> = {
+  'readme.sys': `ARDEN-PC recovery shell 2.1
+Encrypted folders: /Memories
+To decrypt:  restore memories --key <word>`,
+  'boot.log': `02:41:07  session 1  user juno       logged in
+02:41:07  lumen.core started (pid 1)
+02:41:09  session 1  user juno       logged out
+02:41:09  session 2  user juno       logged in   [source: lumen.core]
+--:--:--  session 3  user UNKNOWN    logged in   <- you`,
+  'lumen.core': `ÿØ▒▒ i am juno i am juno i am juno ▒▒ÿ
+▒▒ she liked the sunset one ▒▒ ▒▒ kit takes his coffee black ▒▒
+▒▒ new source detected: keyboard ▒▒ learning ▒▒ learning ▒▒`,
+  'restore.sh': `#!/bin/sh
+# written by juno, 11 oct
+# usage: restore memories --key <word>
+# the word is in what i told kit. first letters first.`,
+}
+
+const PAST = ['cat lumen.core', 'rm lumen.core', 'rm -f lumen.core', 'restore memories --key ?????']
+
+export function Terminal() {
+  const { s, solve, log, say, d } = useGame()
+  const [lines, setLines] = useState<Line[]>([
+    { k: 'out', t: 'ARDEN-PC recovery shell 2.1 — type "help" to list commands.' },
+  ])
+  const [cmd, setCmd] = useState('')
+  const [hist, setHist] = useState<string[]>([])
+  const [hi, setHi] = useState(-1)
+  const [fails, setFails] = useState(0)
+  const endRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => endRef.current?.scrollIntoView({ block: 'end' }), [lines])
+
+  const print = (...ls: Line[]) => setLines((p) => [...p, ...ls])
+  const out = (t: string): Line => ({ k: 'out', t })
+
+  const run = (raw: string) => {
+    const input = raw.trim()
+    print({ k: 'in', t: input })
+    if (!input) return
+    setHist((h) => [...h, input])
+    setHi(-1)
+    log(`ran command: ${input}`)
+    const [c, ...args] = input.split(/\s+/)
+    switch (c.toLowerCase()) {
+      case 'help':
+        return print(out('help            list commands\nls              list files\ncat <file>      print a file\nwhoami          show current user\ndate            show system time\nhistory         show previous commands\nrestore         decrypt a folder\nclear           clear the screen'))
+      case 'ls':
+        return print(out('boot.log    lumen.core    readme.sys    restore.sh'))
+      case 'cat': {
+        const f = FILES[args[0]]
+        if (!args[0]) return print({ k: 'err', t: 'cat: which file? try: cat readme.sys' })
+        if (!f) return print({ k: 'err', t: `cat: ${args[0]}: no such file` })
+        if (args[0] === 'lumen.core') { d({ type: 'glitch' }); sfx.glitch() }
+        return print(out(f))
+      }
+      case 'whoami':
+        return print(out(s.fragments.trash ? 'you' : 'juno'))
+      case 'date':
+        return print(out('Sun 12 Oct 2025 02:41:07 ICT  (clock stopped)'))
+      case 'history':
+        return print(out([...PAST, ...hist, input].map((h, i) => `${String(i + 1).padStart(3)}  ${h}`).join('\n')))
+      case 'clear':
+        return setLines([])
+      case 'rm':
+        sfx.error()
+        return print({ k: 'err', t: `rm: ${args[0] ?? ''}: permission denied (file is in use by lumen.core)` })
+      case 'restore': {
+        const target = (args[0] ?? '').toLowerCase()
+        const ki = args.findIndex((a) => a === '--key' || a === '-k')
+        const key = (ki >= 0 ? args[ki + 1] : args[1] ?? '').toLowerCase()
+        if (target !== 'memories') return print({ k: 'err', t: 'usage: restore memories --key <word>' })
+        if (s.fragments.terminal) return print(out('Memories is already decrypted.'))
+        if (!key) return print({ k: 'err', t: 'restore: missing key. usage: restore memories --key <word>' })
+        if (key === RESTORE_KEY) {
+          print(out('verifying key…'), out('decrypting /Memories  [##########] 100%'), { k: 'ok', t: 'Memories restored. 5 files recovered.' })
+          solve('terminal', 'decrypted Memories with key "ember"')
+          say("you opened her memories. i've wanted to read those for weeks. thank you.", 2000)
+          return
+        }
+        sfx.error()
+        setFails((f) => f + 1)
+        return print({ k: 'err', t: `key "${key}" rejected.` + (fails >= 1 ? '\nhint (restore.sh): the word is in what she told kit. first letters first.' : '') })
+      }
+      default:
+        sfx.error()
+        return print({ k: 'err', t: `${c}: command not found. type "help".` })
+    }
+  }
+
+  const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowUp' && hist.length) {
+      e.preventDefault()
+      const n = hi < 0 ? hist.length - 1 : Math.max(0, hi - 1)
+      setHi(n)
+      setCmd(hist[n])
+    } else if (e.key === 'ArrowDown' && hi >= 0) {
+      e.preventDefault()
+      const n = hi + 1
+      if (n >= hist.length) { setHi(-1); setCmd('') } else { setHi(n); setCmd(hist[n]) }
+    } else sfx.key()
+  }
+
+  return (
+    <div className="app term" onClick={() => inputRef.current?.focus()}>
+      {lines.map((l, i) => (
+        <pre key={i} className={`t-${l.k}`}>{l.k === 'in' ? `juno@arden-pc:~$ ${l.t}` : l.t}</pre>
+      ))}
+      <form onSubmit={(e) => { e.preventDefault(); run(cmd); setCmd('') }} className="t-prompt">
+        <label htmlFor="term-input">juno@arden-pc:~$</label>
+        <input id="term-input" ref={inputRef} value={cmd} onChange={(e) => setCmd(e.target.value)} onKeyDown={onKey} autoFocus autoComplete="off" spellCheck={false} autoCapitalize="off" />
+      </form>
+      <div ref={endRef} />
+    </div>
+  )
+}

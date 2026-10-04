@@ -488,6 +488,15 @@ pre { margin: 0; font-family: inherit; white-space: pre-wrap; }
 .ending .btn { background: var(--paper); color: var(--ink); }
 .ending .btn.is-ghost { background: none; color: var(--paper); }
 
+/* Crash screen (error boundary) */
+.crash { position: fixed; inset: 0; z-index: 9999; background: #07060a; color: var(--paper); padding: clamp(24px, 6vw, 72px); display: flex; flex-direction: column; gap: 14px; }
+.crash p { margin: 0; max-width: 60ch; }
+.crash-title { font-family: var(--f-term); font-size: 32px; color: var(--signal); }
+.crash-msg { font-size: 12px; color: var(--fog); background: #ffffff0a; padding: 12px; border-radius: var(--r); max-width: 100%; overflow-x: auto; }
+.crash-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.crash .btn { background: var(--paper); color: var(--ink); }
+.crash .btn.is-ghost { background: none; color: var(--paper); }
+
 /* Narrow screens: windows open maximised, icons shrink, split panes stack */
 @media (max-width: 720px) {
   .d-icons { grid-template-rows: repeat(auto-fill, 80px); }

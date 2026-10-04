@@ -87,7 +87,7 @@ const CHAIN = [
   { where: 'Photos', what: 'Sort the harbor day by the sky', gives: 'LUMEN' },
   { where: 'Documents', what: 'Unlock journal.lock', gives: 'hint: read Kit messages down the side' },
   { where: 'chat.exe', what: 'First letters of her 11 Oct texts', gives: 'EMBER' },
-  { where: 'Terminal', what: 'restore memories --key ember', gives: 'Memories' },
+  { where: 'Terminal', what: 'Type the key: ember', gives: 'Memories' },
   { where: 'Memories', what: 'memo_04: anything dated after tonight', gives: 'look in Trash' },
   { where: 'Trash', what: 'Restore the file dated today', gives: 'session.log' },
   { where: 'delete_me.txt', what: 'Read the letter. Choose.', gives: '2 endings' },

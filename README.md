@@ -25,6 +25,6 @@ npm run build    # single-file build in dist/index.html
 1. Photos: order the skies dawn → night. Letters spell LUMEN.
 2. Documents: journal.lock password is `lumen`.
 3. chat.exe → Kit, 11 Oct: first letters of Juno's messages spell EMBER.
-4. System → terminal.exe: `restore memories --key ember`.
+4. System → terminal.exe: type `ember` and press Enter.
 5. Memories → memo_04 says anything in Trash dated after 12 Oct isn't Juno's. Restore `session.log` in Trash.
 6. Open delete_me.txt and choose.

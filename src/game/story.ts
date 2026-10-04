@@ -135,7 +135,7 @@ export const LUMEN_ON_SOLVE: Record<string, string> = {
 export const LUMEN_HINTS = {
   photos: 'the photos are out of order. the sky tells you what time it is.',
   journal: "Documents has a locked journal. her todo list knows the password.",
-  terminal: "System has a terminal. it wants a key. she hid it in what she told Kit on the 11th. first letters first.",
+  terminal: "System has a terminal. just type the key into it. she hid the word in what she told Kit on the 11th. first letters first.",
   trash: 'memo_04 in Memories talks about the trash. look at the dates.',
   done: 'nothing left to find. only delete_me.txt.',
 }

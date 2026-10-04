@@ -28,7 +28,7 @@ export function Memories() {
       <div className="app locked-view">
         <Icon name="folder-lock" size={72} />
         <h3>Memories is encrypted</h3>
-        <p>Juno locked this folder on 11 Oct. It can be decrypted from the recovery shell in <b>System</b>.</p>
+        <p>Juno locked this folder on 11 Oct. To unlock it, open <b>System → terminal.exe</b> and type the restore key.</p>
         <button className="btn" onClick={() => open('system')}>Open System</button>
       </div>
     )
